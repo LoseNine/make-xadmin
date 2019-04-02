@@ -3,8 +3,20 @@
 <head>
     <meta charset="UTF-8">
     <title>Title</title>
+    <link rel="stylesheet" href="http://cdn.bootcss.com/twitter-bootstrap/3.0.3/css/bootstrap.min.css">
+    <script src="http://cdn.bootcss.com/jquery/1.10.2/jquery.min.js"></script>
+    <script src="http://cdn.bootcss.com/twitter-bootstrap/3.0.3/js/bootstrap.min.js"></script>
+    <script src="https://code.jquery.com/jquery-3.1.0.min.js"></script>
 </head>
 <body>
 <h1>edit</h1>
+<form method="post" class="form-control">
+{% csrf_token %}
+    {% for field in form %}
+        <label for="">{{ field.label }}</label>
+        {{ field }}
+    {% endfor %}
+    <input type="submit" value="提交" class="btn btn-success">
+</form>
 </body>
 </html>

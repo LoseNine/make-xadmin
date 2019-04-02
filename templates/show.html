@@ -3,8 +3,49 @@
 <head>
     <meta charset="UTF-8">
     <title>Title</title>
+    <link rel="stylesheet" href="http://cdn.bootcss.com/twitter-bootstrap/3.0.3/css/bootstrap.min.css">
+    <script src="http://cdn.bootcss.com/jquery/1.10.2/jquery.min.js"></script>
+    <script src="http://cdn.bootcss.com/twitter-bootstrap/3.0.3/js/bootstrap.min.js"></script>
+    <script src="https://code.jquery.com/jquery-3.1.0.min.js"></script>
 </head>
 <body>
-<p>show data</p>
+<h3>查看 {{ model_name }} 数据</h3>
+
+<div class="container">
+    <div class="row">
+        <div class="col-lg-9">
+        <a href="{{ add_url }}" class="btn btn-info">添加数据</a>
+            <table class="table table-bordered table-striped">
+            <thead>
+                <tr>
+                    {% for label in label_list %}
+                        <th>{{ label }}</th>
+                    {% endfor %}
+                </tr>
+            </thead>
+            <tbody>
+            {% for data in new_data_list %}
+                <tr>
+                    {% for d in data %}
+                        <td>{{ d }}</td>
+                    {% endfor %}
+                </tr>
+            {% endfor %}
+            </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<script>
+    $("#choice").click(function () {
+        if(this.checked){
+            $(".choice_class").attr("checked",true);
+        }else {
+            $(".choice_class").attr("checked",false);
+        }
+    })
+</script>
+
 </body>
 </html>
