@@ -1,5 +1,5 @@
 from django.urls import path,include
-from django.shortcuts import render,HttpResponse
+from django.shortcuts import render,HttpResponse,redirect
 from django.utils.safestring import mark_safe
 from django.urls import reverse
 
@@ -18,18 +18,54 @@ class ModelXadmin:
         return mark_safe("<a href='%s' >删除</a>"%_url)
 
     def Check(self,obj=None):
-        return mark_safe('<input type="checkbox" class="choice_class" />')
+        return mark_safe('<input type="checkbox" class="choice_class" value="%s" name="items" />'%(obj.pk))
 
     list_display=[Check,"id","__str__",Edit,Del]
     get_model_form = []
-
 
     def __init__(self,model,site):
         #保存model和站点配置
         self.model=model
         self.site=site
 
+    def default_action(self,item):
+        print(item)
+    def delete_action(self,queryset):
+        queryset.delete()
+
+    default_action.description='默认操作'
+    delete_action.description='delete_action'
+    actions=[delete_action]
+
+    def new_acctions(self):
+        tmp=[]
+        tmp.append(ModelXadmin.default_action)
+        tmp.extend(self.actions)
+        return tmp
+
+    def show_actions(self):
+        #actions=self.actions   #增加默认批量操作
+        actions=self.new_acctions()
+        temp=[]
+        for a in actions:
+            temp.append({
+                "name":a.__name__,
+                'desc':a.description
+            })
+        return temp
+
+
     def show(self, request):
+        if request.method=='POST':
+            actions=request.POST.get('action')
+            if actions:
+                items=request.POST.getlist("items")
+                queryset=self.model.objects.filter(id__in=items)
+                try:
+                    action_func=getattr(self,actions)
+                    action_func(queryset)
+                except Exception as e:
+                    print(e)
         # app_name=request.path.split('/')[2]
         # model_name = request.path.split('/')[3]
         # print(app_name,model_name)
@@ -70,14 +106,18 @@ class ModelXadmin:
                 lines.append(tmp)
             ADD_LABEL=False
             new_data_list.append(lines)
-
-        label_list[0]=mark_safe('<input type="checkbox" id="choice" />')
+        if label_list:
+            label_list[0]=mark_safe('<input type="checkbox" id="choice" />')
         add_url=reverse("%s_%s_add"%(app_name,model_name))
+
+        actions=self.show_actions()
         return render(request, "show.html",locals())
 
     def delete(self, request, id):
+        model_name=self.model._meta.model_name
+        app_name=self.model._meta.app_label
         self.model.objects.filter(id=id).delete()
-        return self.show(request)
+        return redirect("%s_%s_show"%(app_name,model_name))
 
     # 自定义model样式
     def get_form(self):
@@ -99,7 +139,10 @@ class ModelXadmin:
             form=Modeldemo(request.POST)
             if form.is_valid():
                 obj=form.save()
-                return self.show(request)
+
+                model_name = self.model._meta.model_name
+                app_name = self.model._meta.app_label
+                return redirect("%s_%s_show" % (app_name, model_name))
         return render(request, "add.html",locals())
 
     def edit(self, request, id):
@@ -111,7 +154,10 @@ class ModelXadmin:
             form=ModelAdd(request.POST,instance=obj)
             if form.is_valid():
                 form.save()
-                return self.show(request)
+                
+                model_name = self.model._meta.model_name
+                app_name = self.model._meta.app_label
+                return redirect("%s_%s_show" % (app_name, model_name))
         return render(request,'edit.html',locals())
 
     @property

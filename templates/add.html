@@ -10,12 +10,9 @@
 </head>
 <body>
 <h2>添加数据</h2>
-<form method="post" class="form-control">
+<form method="post" class="form form-group">
 {% csrf_token %}
-    {% for field in form %}
-        <label for="">{{ field.label }}</label>
-        {{ field }}
-    {% endfor %}
+    {{ form.as_ul }}
     <input type="submit" value="提交" class="btn btn-success">
 </form>
 </body>

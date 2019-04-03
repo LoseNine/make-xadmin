@@ -15,6 +15,16 @@
     <div class="row">
         <div class="col-lg-9">
         <a href="{{ add_url }}" class="btn btn-info">添加数据</a>
+
+        <form method="post" action="">
+            {% csrf_token %}
+            <select name="action" id="" style="width: 150px;">
+
+                {% for action in actions %}
+                    <option name="{{ action.name }}">{{ action.desc }}</option>
+                {% endfor %}
+            </select>
+            <input class="button btn-upload" value="Go" type="submit" id="go">
             <table class="table table-bordered table-striped">
             <thead>
                 <tr>
@@ -33,6 +43,7 @@
             {% endfor %}
             </tbody>
             </table>
+        </form>
         </div>
     </div>
 </div>
@@ -44,7 +55,16 @@
         }else {
             $(".choice_class").attr("checked",false);
         }
-    })
+    });
+    $(".choice_class").click(function () {
+        var flag=true;
+        $(".choice_class").each(function () {
+            if(!this.checked){
+                flag=false;
+            }
+        });
+        $("#choice").attr("checked",flag);
+    });
 </script>
 
 </body>
