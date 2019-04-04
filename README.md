@@ -7,7 +7,7 @@ admin后台最显著的好处就是路由分发，每一个模型都对应了增
 
 这个项目也主要是粗糙地实现这一功能
 
-xadmin主要代码位于 ./xadmin/service/xadmin.py中（建立app是为了方便测试）
+### xadmin主要代码位于 ./xadmin/service/xadmin.py中（建立app是为了方便测试）
 
 IDE：Pycharm    Python版本: 3.6   
 
