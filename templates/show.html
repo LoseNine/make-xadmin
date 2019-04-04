@@ -9,9 +9,10 @@
     <script src="https://code.jquery.com/jquery-3.1.0.min.js"></script>
 </head>
 <body>
-<h3>查看 {{ model_name }} 数据</h3>
-
 <div class="container">
+        <div class="page-header">
+      <h1>查看  <small>{{ model_name }}</small></h1>
+    </div>
     <div class="row">
         <div class="col-lg-9">
         <a href="{{ add_url }}" class="btn btn-info">添加数据</a>
@@ -34,7 +35,7 @@
                 </tr>
             </thead>
             <tbody>
-            {% for data in new_data_list %}
+            {% for data in cc %}
                 <tr>
                     {% for d in data %}
                         <td>{{ d }}</td>
@@ -44,6 +45,40 @@
             </tbody>
             </table>
         </form>
+
+        <div class="pagination">
+            {% if cc.has_previous %}
+                <li>
+                <a href="{{ show_link }}?p={{ cc.previous_page_number }}">previous</a>
+                </li>
+            {% endif %}
+            {% for pp in pages.page_range %}
+                {% if pp == cc.number %}
+                    <li><a class="disabled">{{ pp }}</a></li>
+                {% else %}
+                    <li><a href="{{ show_link }}?p={{ pp }}">{{ pp }}</a></li>
+                {% endif %}
+            {% endfor %}
+
+            {% if cc.has_next %}
+                <li><a href="{{ show_link }}?p={{ cc.next_page_number }}">next</a></li>
+            {% endif %}
+        </div>
+        </div>
+        <div class="col-md-3">
+            {% for field in filter_fields %}
+                <div class="panel panel-primary">
+                    <div class="panel-heading">{{ field.name }}</div>
+                    <table class="table-bordered table table-striped">
+                        {% for i in field.fields %}
+                            <tr class="panel-body"><td>
+                                <a href="{{ i.1 }}">{{ i.0 }}</a>
+                            </td></tr>
+                        {% endfor %}
+                    </table>
+                </div>
+            {% endfor %}
+
         </div>
     </div>
 </div>

@@ -1,9 +1,15 @@
 from django.urls import path,include
-from django.shortcuts import render,HttpResponse,redirect
+from django.shortcuts import render,redirect
 from django.utils.safestring import mark_safe
 from django.urls import reverse
+from django.core.paginator import Paginator
 
 class ModelXadmin:
+    def __init__(self,model,site):
+        #保存model和站点配置
+        self.model=model
+        self.site=site
+
     def Edit(self,obj=None):
         model_name=self.model._meta.model_name
         app_label=self.model._meta.app_label
@@ -23,10 +29,6 @@ class ModelXadmin:
     list_display=[Check,"id","__str__",Edit,Del]
     get_model_form = []
 
-    def __init__(self,model,site):
-        #保存model和站点配置
-        self.model=model
-        self.site=site
 
     def default_action(self,item):
         print(item)
@@ -54,8 +56,19 @@ class ModelXadmin:
             })
         return temp
 
+    #自定义分页
+    def pagein(self,request,new_data_list,p=1):
+        pages = Paginator(new_data_list, 5)
+        page = request.GET.get('p', None)
+        if page:
+            cc = pages.page(page)
+        else:
+            cc = pages.page(p)
+        return cc,pages
+
 
     def show(self, request):
+        p=request.GET.get('p',1)
         if request.method=='POST':
             actions=request.POST.get('action')
             if actions:
@@ -71,6 +84,9 @@ class ModelXadmin:
         # print(app_name,model_name)
         model_name=self.model._meta.model_name
         app_name=self.model._meta.app_label
+
+        #为分页添加路由
+        show_link='/xadmin/%s/%s/show'%(app_name,model_name)
 
         obj_list = self.model.objects.all()
 
@@ -111,6 +127,12 @@ class ModelXadmin:
         add_url=reverse("%s_%s_add"%(app_name,model_name))
 
         actions=self.show_actions()
+
+        #分页
+        cc,pages=self.pagein(request,new_data_list,p)
+
+        #过滤
+        filter_fields=self.get_list_filer()
         return render(request, "show.html",locals())
 
     def delete(self, request, id):
@@ -154,7 +176,7 @@ class ModelXadmin:
             form=ModelAdd(request.POST,instance=obj)
             if form.is_valid():
                 form.save()
-                
+
                 model_name = self.model._meta.model_name
                 app_name = self.model._meta.app_label
                 return redirect("%s_%s_show" % (app_name, model_name))

@@ -1,5 +1,5 @@
 from xadmin.service.xadmin import site,ModelXadmin
-from .models import Questions,Choice,Mymodel
+from .models import Publish,Author,Book
 from django.utils.safestring import mark_safe
 
 # class QuestionConfig(ModelXadmin):
@@ -21,6 +21,6 @@ from django.utils.safestring import mark_safe
 #     list_display=[Check,"id","name",'views','created',Edit,Del]
 
 
-site.register(Questions)
-site.register(Choice)
-site.register(Mymodel)
+site.register(Publish)
+site.register(Book)
+site.register(Author)
