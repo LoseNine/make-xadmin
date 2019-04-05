@@ -1,5 +1,5 @@
 # make-xadmin
-自制Django的后台组件（粗糙）
+自制Django的后台组件
  
 xadmin组件主要是模仿django自带的admin后台，拿来练练手。
 
