@@ -16,8 +16,8 @@ class Publish(models.Model):
     
 class Book(models.Model):
     name=models.CharField('书名',max_length=500)
-    publish=models.ManyToManyField(Publish)
-    author=models.ForeignKey(Author,on_delete=models.CASCADE)
+    publish=models.ManyToManyField(to=Publish)
+    author=models.ForeignKey(to=Author,on_delete=models.CASCADE)
 
     def __str__(self):
         return "%s"%self.name

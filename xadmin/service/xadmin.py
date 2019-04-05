@@ -3,6 +3,13 @@ from django.shortcuts import render,redirect
 from django.utils.safestring import mark_safe
 from django.urls import reverse
 from django.core.paginator import Paginator
+from django.db.models import Q
+from django.db.models.fields.related import ForeignKey, ManyToManyField
+from django.db.models.fields import related
+
+import copy
+from urllib.parse import urlencode
+
 
 class ModelXadmin:
     def __init__(self,model,site):
@@ -28,6 +35,7 @@ class ModelXadmin:
 
     list_display=[Check,"id","__str__",Edit,Del]
     get_model_form = []
+    list_filter=[]
 
 
     def default_action(self,item):
@@ -38,6 +46,7 @@ class ModelXadmin:
     default_action.description='默认操作'
     delete_action.description='delete_action'
     actions=[delete_action]
+
 
     def new_acctions(self):
         tmp=[]
@@ -66,8 +75,72 @@ class ModelXadmin:
             cc = pages.page(p)
         return cc,pages
 
+    def get_list_filter(self,request):
+        #params=copy.deepcopy(request.GET)#放在外边，之后还在里边加，就是说一个模型关联的两张表的信息
+
+        link_dict={}
+        for filter_field in self.list_filter:
+            params = copy.deepcopy(request.GET)
+            cid = request.GET.get(filter_field,0)#用于前端变色
+
+            #根据字段获取关联表
+            filter_field_obj=self.model._meta.get_field(filter_field)
+            # print('filter_field_obj:',filter_field_obj)
+            # print(type(filter_field_obj))
+            # if isinstance(filter_field_obj,related.RelatedField):
+            #     print('related_model:',filter_field_obj.related_model.objects.all())
+
+            #关联表的全部数据,只适用于一对多，多对多
+            if isinstance(filter_field_obj,related.RelatedField):
+                data_list=filter_field_obj.related_model.objects.all()
+            else:
+                #普通字段
+                data_list=self.model.objects.values('pk',filter_field)
+
+            temp=[]
+
+            #添加全部标签，有全部的时候删除其他键值
+            if params.get(filter_field,None):
+                del params[filter_field]
+                temp.append('<a href="?%s">全部</a>'%(urlencode(params)))
+            else:
+                temp.append('<a href="#">全部</a>' )
+
+            #处理关联数据
+            for obj in data_list:
+
+                #分开普通字段和多对多
+                if isinstance(filter_field_obj,related.RelatedField):
+                    pk=obj.pk
+                    text=str(obj)
+                    params[filter_field] = pk
+                else:
+                    pk=obj.get('pk')
+                    text=obj.get(filter_field)
+                    params[filter_field] = text
+
+                _url=urlencode(params)
+
+                if cid==str(pk) or cid==text:
+                    link_tag = "<a href='?%s' class='active'>%s</a>" % (_url, text)
+                else:
+                    link_tag="<a href='?%s'>%s</a>"%(_url,text)
+                temp.append(link_tag)
+
+            link_dict[filter_field]=temp
+
+        return link_dict
+
+    def get_filter_condition(self,request):
+        filter_condition=Q()
+        for filter_field,val in request.GET.items():
+            if filter_field in self.list_filter:#排除分页标签的干扰
+                filter_condition.children.append((filter_field,val))
+
+        return filter_condition
 
     def show(self, request):
+        filter_fields=self.get_list_filter(request)
         p=request.GET.get('p',1)
         if request.method=='POST':
             actions=request.POST.get('action')
@@ -88,17 +161,32 @@ class ModelXadmin:
         #为分页添加路由
         show_link='/xadmin/%s/%s/show'%(app_name,model_name)
 
-        obj_list = self.model.objects.all()
+        #过滤
+        filter_condition=self.get_filter_condition(request)
+
+        obj_list = self.model.objects.all().filter(filter_condition)
 
         #处理数据
         new_data_list=list()
         label_list = []
+        # filter_fields=self.list_filter
+        # print(filter_fields)
         ADD_LABEL=True # 处理表头,只在第一次循环时候添加，之后改为False
         for obj in obj_list:      #[obj, obj, obj]
             lines=[]
             for line in self.list_display:
+
                 if isinstance(line,str):#如果是字段而不是自定义函数，比如delete，edit等等操作
                     tmp=getattr(obj,line)   #getattr(obj,id)
+
+                    #多对多
+                    field_obj = self.model._meta.get_field(line)
+                    if isinstance(field_obj,ManyToManyField):
+                        tmps=tmp.all()
+                        tmp=[]
+                        for i in tmps:
+                            tmp.append(str(i))
+                        tmp=','.join(tmp)
 
                     if ADD_LABEL:
                         #如果model存在自定义的汉字名字，则使用
@@ -131,8 +219,6 @@ class ModelXadmin:
         #分页
         cc,pages=self.pagein(request,new_data_list,p)
 
-        #过滤
-        filter_fields=self.get_list_filer()
         return render(request, "show.html",locals())
 
     def delete(self, request, id):

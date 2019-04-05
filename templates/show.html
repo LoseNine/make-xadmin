@@ -7,6 +7,11 @@
     <script src="http://cdn.bootcss.com/jquery/1.10.2/jquery.min.js"></script>
     <script src="http://cdn.bootcss.com/twitter-bootstrap/3.0.3/js/bootstrap.min.js"></script>
     <script src="https://code.jquery.com/jquery-3.1.0.min.js"></script>
+    <style>
+        .active{
+            color: #b32c1b!important;
+        }
+    </style>
 </head>
 <body>
 <div class="container">
@@ -15,70 +20,70 @@
     </div>
     <div class="row">
         <div class="col-lg-9">
-        <a href="{{ add_url }}" class="btn btn-info">添加数据</a>
+            <a href="{{ add_url }}" class="btn btn-info">添加数据</a>
 
-        <form method="post" action="">
-            {% csrf_token %}
-            <select name="action" id="" style="width: 150px;">
+            <form method="post" action="">
+                {% csrf_token %}
+                <select name="action" id="" style="width: 150px;">
 
-                {% for action in actions %}
-                    <option name="{{ action.name }}">{{ action.desc }}</option>
+                    {% for action in actions %}
+                        <option name="{{ action.name }}">{{ action.desc }}</option>
+                    {% endfor %}
+                </select>
+                <input class="button btn-info btn-sm" value="Go" type="submit" id="go">
+                <table class="table table-bordered table-striped">
+                <thead>
+                    <tr>
+                        {% for label in label_list %}
+                            <th>{{ label }}</th>
+                        {% endfor %}
+                    </tr>
+                </thead>
+                <tbody>
+                {% for data in cc %}
+                    <tr>
+                        {% for d in data %}
+                            <td>{{ d }}</td>
+                        {% endfor %}
+                    </tr>
                 {% endfor %}
-            </select>
-            <input class="button btn-upload" value="Go" type="submit" id="go">
-            <table class="table table-bordered table-striped">
-            <thead>
-                <tr>
-                    {% for label in label_list %}
-                        <th>{{ label }}</th>
-                    {% endfor %}
-                </tr>
-            </thead>
-            <tbody>
-            {% for data in cc %}
-                <tr>
-                    {% for d in data %}
-                        <td>{{ d }}</td>
-                    {% endfor %}
-                </tr>
-            {% endfor %}
-            </tbody>
-            </table>
-        </form>
+                </tbody>
+                </table>
+            </form>
 
-        <div class="pagination">
-            {% if cc.has_previous %}
-                <li>
-                <a href="{{ show_link }}?p={{ cc.previous_page_number }}">previous</a>
-                </li>
-            {% endif %}
-            {% for pp in pages.page_range %}
-                {% if pp == cc.number %}
-                    <li><a class="disabled">{{ pp }}</a></li>
-                {% else %}
-                    <li><a href="{{ show_link }}?p={{ pp }}">{{ pp }}</a></li>
+            <div class="pagination">
+                {% if cc.has_previous %}
+                    <li>
+                    <a href="{{ show_link }}?p={{ cc.previous_page_number }}">previous</a>
+                    </li>
                 {% endif %}
-            {% endfor %}
+                {% for pp in pages.page_range %}
+                    {% if pp == cc.number %}
+                        <li><a class="disabled">{{ pp }}</a></li>
+                    {% else %}
+                        <li><a href="{{ show_link }}?p={{ pp }}">{{ pp }}</a></li>
+                    {% endif %}
+                {% endfor %}
 
-            {% if cc.has_next %}
-                <li><a href="{{ show_link }}?p={{ cc.next_page_number }}">next</a></li>
-            {% endif %}
-        </div>
+                {% if cc.has_next %}
+                    <li><a href="{{ show_link }}?p={{ cc.next_page_number }}">next</a></li>
+                {% endif %}
+            </div>
         </div>
         <div class="col-md-3">
-            {% for field in filter_fields %}
+            <h3>Filter</h3>
+            {% for filter_field,link_tag in filter_fields.items %}
                 <div class="panel panel-primary">
-                    <div class="panel-heading">{{ field.name }}</div>
+                    <div class="panel-heading">{{ filter_field|upper }}</div>
                     <table class="table-bordered table table-striped">
-                        {% for i in field.fields %}
+                        {% for link in link_tag %}
                             <tr class="panel-body"><td>
-                                <a href="{{ i.1 }}">{{ i.0 }}</a>
+                                <p>{{ link|safe }}</p>
                             </td></tr>
                         {% endfor %}
                     </table>
                 </div>
             {% endfor %}
-
         </div>
     </div>
 </div>
