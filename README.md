@@ -13,7 +13,7 @@ IDE：Pycharm    Python版本: 3.6
 
 ### 界面展示
 
-![avatar](/make-xadmin/templates/img/1.png)
+![avatar](https://github.com/LoseNine/make-xadmin/blob/master/templates/img/1.png)
 
 ### 经过
 
