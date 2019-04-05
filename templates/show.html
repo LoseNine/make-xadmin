@@ -21,7 +21,9 @@
     <div class="row">
         <div class="col-lg-9">
             <a href="{{ add_url }}" class="btn btn-info">添加数据</a>
-
+            <form method="get" class="pull-right">
+                <input name="search" type="text" placeholder="根据名字查询"><input type="submit" >
+            </form>
             <form method="post" action="">
                 {% csrf_token %}
                 <select name="action" id="" style="width: 150px;">
@@ -30,7 +32,7 @@
                         <option name="{{ action.name }}">{{ action.desc }}</option>
                     {% endfor %}
                 </select>
-                <input class="button btn-info btn-sm" value="Go" type="submit" id="go">
+                <input  value="Go" type="submit" id="go">
                 <table class="table table-bordered table-striped">
                 <thead>
                     <tr>
@@ -70,6 +72,7 @@
                 {% endif %}
             </div>
         </div>
+
         <div class="col-md-3">
             <h3>Filter</h3>
             {% for filter_field,link_tag in filter_fields.items %}

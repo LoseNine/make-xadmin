@@ -36,6 +36,7 @@ class ModelXadmin:
     list_display=[Check,"id","__str__",Edit,Del]
     get_model_form = []
     list_filter=[]
+    list_search=['id']
 
 
     def default_action(self,item):
@@ -139,8 +140,21 @@ class ModelXadmin:
 
         return filter_condition
 
+    def get_search(self,request):
+        search=request.GET.get('search',None)
+
+        if search:
+            data_list = Q()
+            for line in self.list_search:
+                line=line+'__contains'
+                data_list.children.append((line,search))
+            return data_list
+        return None
+
+
     def show(self, request):
         filter_fields=self.get_list_filter(request)
+
         p=request.GET.get('p',1)
         if request.method=='POST':
             actions=request.POST.get('action')
@@ -164,7 +178,12 @@ class ModelXadmin:
         #过滤
         filter_condition=self.get_filter_condition(request)
 
-        obj_list = self.model.objects.all().filter(filter_condition)
+        #查询
+        search_condition=self.get_search(request)
+        if search_condition:
+            obj_list = self.model.objects.all().filter(filter_condition).filter(search_condition)
+        else:
+            obj_list = self.model.objects.all().filter(filter_condition)
 
         #处理数据
         new_data_list=list()

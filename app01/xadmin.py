@@ -6,6 +6,7 @@ class BookConfig(ModelXadmin):
      #自定义的config
      list_display=[ModelXadmin.Check,"id","name","author",'publish',ModelXadmin.Del,ModelXadmin.Edit]
      list_filter=["author","publish",'name']
+     list_search = ["name"]
 
 
 site.register(Publish)
