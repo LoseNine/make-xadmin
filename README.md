@@ -1,7 +1,7 @@
 # make-xadmin
-自制Django的后台（粗糙）
+自制Django的后台组件（粗糙）
  
-xadmin主要是模仿django自带的admin后台，拿来练练手。
+xadmin组件主要是模仿django自带的admin后台，拿来练练手。
 
 admin后台最显著的好处就是路由分发，每一个模型都对应了增删改查，尤其方便
 
@@ -11,6 +11,10 @@ admin后台最显著的好处就是路由分发，每一个模型都对应了增
 
 IDE：Pycharm    Python版本: 3.6   
 
+### 界面展示
+
+![avatar](https://github.com/LoseNine/make-xadmin/blob/master/templates/img/1.png)
+
 ### 经过
 
 * 添加增删改查
@@ -19,4 +23,4 @@ IDE：Pycharm    Python版本: 3.6
 
 * 添加分页
 
-
+* 添加过滤
