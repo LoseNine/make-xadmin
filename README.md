@@ -11,6 +11,10 @@ admin后台最显著的好处就是路由分发，每一个模型都对应了增
 
 IDE：Pycharm    Python版本: 3.6   
 
+### 界面展示
+
+![avatar](/make-xadmin/templates/img/1.png)
+
 ### 经过
 
 * 添加增删改查
@@ -19,4 +23,4 @@ IDE：Pycharm    Python版本: 3.6
 
 * 添加分页
 
-
+* 添加过滤
