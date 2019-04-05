@@ -146,16 +146,13 @@ class ModelXadmin:
         if search:
             data_list = Q()
             for line in self.list_search:
+                data_list.connector='or'
                 line=line+'__contains'
                 data_list.children.append((line,search))
             return data_list
         return None
 
-
-    def show(self, request):
-        filter_fields=self.get_list_filter(request)
-
-        p=request.GET.get('p',1)
+    def get_post_action(self,request):
         if request.method=='POST':
             actions=request.POST.get('action')
             if actions:
@@ -166,6 +163,12 @@ class ModelXadmin:
                     action_func(queryset)
                 except Exception as e:
                     print(e)
+
+    def show(self, request):
+        filter_fields=self.get_list_filter(request)
+
+        p=request.GET.get('p',1)
+        self.get_post_action(request)
         # app_name=request.path.split('/')[2]
         # model_name = request.path.split('/')[3]
         # print(app_name,model_name)
@@ -195,7 +198,13 @@ class ModelXadmin:
             lines=[]
             for line in self.list_display:
 
-                if isinstance(line,str):#如果是字段而不是自定义函数，比如delete，edit等等操作
+                if callable(line):    #如果是一个自定义函数，就是可回调的，走这一条路
+                    tmp=line(self,obj)      #加入的是自定义函数的返回值，也就是一个url链接（a标签）
+
+                    if ADD_LABEL:
+                        label_list.append("操作")
+
+                elif isinstance(line,str):#如果是字段而不是自定义函数，比如delete，edit等等操作
                     tmp=getattr(obj,line)   #getattr(obj,id)
 
                     #多对多
@@ -220,23 +229,25 @@ class ModelXadmin:
                             #print('[Warning]',e)
                             label_list.append("默认字段")
 
-                elif callable(line):    #如果是一个自定义函数，就是可回调的，走这一条路
-                    tmp=line(self,obj)      #加入的是自定义函数的返回值，也就是一个url链接（a标签）
-
-                    if ADD_LABEL:
-                        label_list.append("操作")
-
                 lines.append(tmp)
             ADD_LABEL=False
             new_data_list.append(lines)
+
+        #解决没有obj_List的时候，表头空白的BUG
+        if not obj_list:
+            label_list=['','id','默认字段','删除','编辑']
+
+        #表头的复选框
         if label_list:
             label_list[0]=mark_safe('<input type="checkbox" id="choice" />')
+
         add_url=reverse("%s_%s_add"%(app_name,model_name))
 
         actions=self.show_actions()
 
         #分页
         cc,pages=self.pagein(request,new_data_list,p)
+
 
         return render(request, "show.html",locals())
 
